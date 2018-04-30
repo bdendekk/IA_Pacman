@@ -19,6 +19,15 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+from game import Directions
+s = Directions.SOUTH
+w = Directions.WEST
+e = Directions.EAST
+n = Directions.NORTH
+
+# dictionnaire contenant la "boussole" (liste des directions possibles) 
+compass = {'South': s, 'West': w, 'East': e, 'North': n}
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -89,34 +98,27 @@ def depthFirstSearch(problem):
 
     "*** YOUR CODE HERE ***"
 
-    from game import Directions
-    s = Directions.SOUTH
-    w = Directions.WEST
-    e = Directions.EAST
-    n = Directions.NORTH
+    
 
-    # dictionnaire contenant la "boussole" (liste des directions possibles) 
-    compass = {'South': s, 'West': w, 'East': e, 'North': n}
-
-    P = util.Stack()
-    P.push( (problem.getStartState(), []) ) #dans la pile on associe chaque sommet au chemin parcouru pour y parvenir
+    frontier = util.Stack()  #sommets vus mais pas explores
+    frontier.push( (problem.getStartState(), []) ) #dans la pile on associe chaque sommet au chemin parcouru pour y parvenir
 
     # NB : un sommet est represente par ses coordonnees
     visited = [] #liste des sommets visites
 
-    while not P.isEmpty() :
-        s = P.pop()  # etat actuel du probleme
+    while not frontier.isEmpty() :
+        current = frontier.pop()  # etat actuel du probleme
 
-        if problem.isGoalState(s[0]):
-            return s[1]  # si on est arrive, on renvoie le chemin
+        if problem.isGoalState(current[0]):
+            return current[1]  # si on est arrive, on renvoie le chemin
 
         else:  #le but n'est pas encore atteint, i.e on est pas arrive
-            if s[0] not in visited:
-                visited.append(s[0])
-                for succ in problem.getSuccessors(s[0]):
+            if current[0] not in visited:
+                visited.append(current[0])
+                for succ in problem.getSuccessors(current[0]):
                     if succ[0] not in visited:
-                        path = s[1]+[compass[succ[1]]]
-                        P.push( (succ[0], path) ) 
+                        path = current[1]+[compass[succ[1]]]
+                        frontier.push( (succ[0], path) ) 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
@@ -138,7 +140,59 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    """ init """
+    # on utilise une PriorityQueue car on veut traiter les sommets avec un cout interessant en priorite
+    frontier = util.PriorityQueue()  #sommets vus mais pas explores
+    start = problem.getStartState()
+    frontier.update(start, 0)
+    came_from = {}  #on veut garder une trace de d'ou on viens pour chaque sommet visite
+    cost_so_far = {}  #chaque sommet associe a son cout total depuis la position start 
+    came_from[start] = None
+    cost_so_far[start] = 0
+
+    """ la recherche commence ! """
+    while not frontier.isEmpty():  #tant qu'il reste des sommets vus a explorer
+        current = frontier.pop()
+
+        if problem.isGoalState(current):  # si on est arrive
+            break  # on va chercher le chemin
+        
+        else:
+            for succ in problem.getSuccessors(current):
+                new_cost = cost_so_far[current] + 1 # cout du chemin vers ce successeur
+                if succ[0] not in came_from: # on verifie qu'on ne retourne pas sur ses pas
+                    cost_so_far[succ[0]] = new_cost  # mise a jour du cout
+                    priority = new_cost + heuristic(succ[0], problem) # mise a jour de la priorite en fonction de l'heuristique
+                    frontier.update(succ[0], priority)
+                    came_from[succ[0]] = current  #maintenant que si on est a succ, on vient de current
+
+
+    """ Recuperation du chemin """
+    path = []
+    while current != start:  # on remonte le graphe pour recuperer le chemin parcouru, mais a l'envers !
+        before = came_from[current]
+        path.append(movement(before,current))
+        current = before
+    #path.append(start)
+    path.reverse()  # pour avoir le chemin dans le bon ordre
+    print path
+    return path
+
+def movement(a,b):
+    """ donne la direction du mouvement de a vers b """
+    if a[1] < b[1]: # mouvement vers le haut
+        return n  
+
+    if a[1] > b[1]: # mouvement vers le bas
+        return s  
+
+    if a[0] < b[0]: # mouvement ver la droite
+        return e
+
+    if a[0] > b[0]: # mouvement vers la gauche
+        return w
+
 
 
 # Abbreviations
@@ -146,3 +200,4 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
