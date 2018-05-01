@@ -123,7 +123,22 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #La methode pour la recherche en largeur est la meme que pour la recherche en profondeur,
+    #sauf que l'on utilise une file (LIFO) a la place d'une pile (FIFO) pour la recherche en largeur.
+    frontier = util.Queue()
+    frontier.push((problem.getStartState(), []))
+    visited = []
+    while not frontier.isEmpty():
+        current = frontier.pop()
+        if problem.isGoalState(current[0]):
+            return current[1]
+        else:
+            if current[0] not in visited:
+                visited.append(current[0])
+                for succ in problem.getSuccessors(current[0]):
+                    if succ[0] not in visited:
+                        path = current[1] + [compass[succ[1]]]
+                        frontier.push((succ[0], path))
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
