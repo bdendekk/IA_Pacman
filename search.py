@@ -24,8 +24,6 @@ s = Directions.SOUTH
 w = Directions.WEST
 e = Directions.EAST
 n = Directions.NORTH
-
-# dictionnaire contenant la "boussole" (liste des directions possibles) 
 compass = {'South': s, 'West': w, 'East': e, 'North': n}
 
 class SearchProblem:
@@ -90,28 +88,20 @@ def depthFirstSearch(problem):
 
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
-    """
+
     print "Start:", problem.getStartState()
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    print problem
-
+    """
     "*** YOUR CODE HERE ***"
-
-    
-
-    frontier = util.Stack()  #sommets vus mais pas explores
+    frontier = util.Stack()
     frontier.push( (problem.getStartState(), []) ) #dans la pile on associe chaque sommet au chemin parcouru pour y parvenir
-
     # NB : un sommet est represente par ses coordonnees
     visited = [] #liste des sommets visites
-
     while not frontier.isEmpty() :
         current = frontier.pop()  # etat actuel du probleme
-
         if problem.isGoalState(current[0]):
             return current[1]  # si on est arrive, on renvoie le chemin
-
         else:  #le but n'est pas encore atteint, i.e on est pas arrive
             if current[0] not in visited:
                 visited.append(current[0])
@@ -155,7 +145,7 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-
+    
     """ init """
     # on utilise une PriorityQueue car on veut traiter les sommets avec un cout interessant en priorite
     frontier = util.PriorityQueue()  #sommets vus mais pas explores
@@ -169,7 +159,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """ la recherche commence ! """
     while not frontier.isEmpty():  #tant qu'il reste des sommets vus a explorer
         current = frontier.pop()
-
+        
         if problem.isGoalState(current):  # si on est arrive
             break  # on va chercher le chemin
         
@@ -181,38 +171,29 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     priority = new_cost + heuristic(succ[0], problem) # mise a jour de la priorite en fonction de l'heuristique
                     frontier.update(succ[0], priority)
                     came_from[succ[0]] = current  #maintenant que si on est a succ, on vient de current
-
-
+    
     """ Recuperation du chemin """
     path = []
     while current != start:  # on remonte le graphe pour recuperer le chemin parcouru, mais a l'envers !
         before = came_from[current]
         path.append(movement(before,current))
         current = before
-    #path.append(start)
     path.reverse()  # pour avoir le chemin dans le bon ordre
-    print path
     return path
 
 def movement(a,b):
     """ donne la direction du mouvement de a vers b """
     if a[1] < b[1]: # mouvement vers le haut
         return n  
-
     if a[1] > b[1]: # mouvement vers le bas
-        return s  
-
+        return s
     if a[0] < b[0]: # mouvement ver la droite
         return e
-
     if a[0] > b[0]: # mouvement vers la gauche
         return w
-
-
 
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
-
